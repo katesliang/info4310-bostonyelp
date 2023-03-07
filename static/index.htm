@@ -7,6 +7,10 @@
     <script src="https://d3js.org/topojson.v2.min.js"></script>
 
     <style>
+        #visualization {
+            display: flex;
+        }
+
         /* ALL TOOLTIP STYLES */
         #tooltip {
             position: absolute;
@@ -57,19 +61,51 @@
     <div class="title">
         <h1>Boston Restaurants</h1>
     </div>
-    <div id="tooltip">
-        <div class="row-1">
-            <h1 id="restaurant-title"></h1>
+    <div id="visualization">
+        <div id="tooltip">
+            <div class="row-1">
+                <h1 id="restaurant-title"></h1>
+            </div>
+            <div class="row-2">
+                <p id="rating"></p>
+                <p id="review-count"></p>
+            </div>
+            <div class="row-3">
+                <p id="snippet-text"></p>
+            </div>
         </div>
-        <div class="row-2">
-            <p id="rating"></p>
-            <p id="review-count"></p>
-        </div>
-        <div class="row-3">
-            <p id="snippet-text"></p>
+        <svg id="bubbleplot" height="900" width="900"></svg>
+        <div id="filters">
+            <div id="categories">
+                <p>Category</p>
+                <select id="select-category">
+                    <option value="None">None</option>
+                </select>
+            </div>
+            <div id="ratings">
+                <p>Rating</p>
+                <input type="checkbox" id="one-star" name="chk" value="one">
+                <label for="one-star">⭐</label>
+                <input type="checkbox" id="two-star" name="chk" value="two">
+                <label for="two-star">⭐⭐</label>
+                <input type="checkbox" id="three-star" name="chk" value="three">
+                <label for="three-star">⭐⭐⭐</label>
+                <input type="checkbox" id="four-star" name="chk" value="four">
+                <label for="four-star">⭐⭐⭐⭐</label>
+                <input type="checkbox" id="five-star" name="chk" value="five">
+                <label for="five-star">⭐⭐⭐⭐⭐</label>
+            </div>
+            <div id="prices">
+                <p>Price</p>
+                <input type="checkbox" id="one-dollar" name="chk" value="one">
+                <label for="one-dollar">$</label>
+                <input type="checkbox" id="two-dollar" name="chk" value="two">
+                <label for="two-dollar">$$</label>
+                <input type="checkbox" id="three-dollar" name="chk" value="three">
+                <label for="three-dollar">$$$</label>
+            </div>
         </div>
     </div>
-    <svg id="bubbleplot" height="900" width="900"></svg>
 
     <script>
         const svg = d3.select("#bubbleplot");
@@ -86,6 +122,7 @@
 
         const drawPlot = async () => {
             const yelpData = await d3.csv("yelp_boston.csv");
+            let categories = []
 
             yelpData.forEach(d => {
                 d.latitude = Number(d.latitude);
@@ -93,6 +130,33 @@
                 d.latitudeDistance = Number(Math.abs(d.latitude - currentLocation[0]))
                 d.longitudeDistance = Number(Math.abs(d.longitude - currentLocation[1]))
                 d.rating = Number(d.rating);
+                if (!categories.includes(d.search_category)) {
+                    categories.push(d.search_category)
+                }
+            })
+
+            // Get all categories for dropdown filter
+            categories.forEach(c => {
+                // Format string correctly
+                let category;
+
+                switch (c) {
+                    case "newamerican":
+                        category = "New American"
+                        break;
+                    case "indpak":
+                        category = "Indian-Pakistani"
+                        break;
+                    case "ethnicmarkets":
+                        category = "Ethnic Markets"
+                        break;
+                    default:
+                        category = c.charAt(0).toUpperCase() + c.slice(1)
+                }
+                d3.select("#select-category").append("option")
+                    .attr("value", category)
+                    .text(category);
+
             })
 
             const minRadius = 5;
