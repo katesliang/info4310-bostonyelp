@@ -1,5 +1,50 @@
 <html>
+
+<head>
+    <title>INFO4310 - Boston Restaurants</title>
+
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://d3js.org/topojson.v2.min.js"></script>
+
+    <style></style>
+
+</head>
+
 <body>
-  <p> All of your publicly available files should live in public_site. Make sure index.htm is your main page </p>
+    <div class="title">
+        <h1>Boston Restaurants</h1>
+    </div>
+
+    <div class="content">
+      <svg id="bubbleplot" height="900" width="900"></svg>
+    </div>
+    
+    <script>
+      const svg = d3.select("#bubbleplot");
+      const margins = { top: 10, right: 10, bottom: 10, left: 10};
+      const width = svg.attr("width");
+      const height = svg.attr("height");
+      const chartWidth = width - margins.left - margins.right;
+      const chartHeight = height - margins.top - margins.bottom;
+      let chartArea = svg.append("g").attr("id", "points").attr("transform",`translate(${margin.left}, ${margin.top}`);
+
+      const drawCircles = async () => {
+        const yelpData = await d3.csv("yelp_boston.csv");
+        console.log(yelpData);
+
+        const xExtent = d3.extent(yelpData, d => d.latitude);
+        const xScale = d3.scaleLinear().domain(xExtent).range([0, chartWidth]);
+
+        const yExtent = d3.extent(yelpData, d => d.longtitude);
+        const yScale = d3.scaleLinear().domain(yExtent).range([chartHeight, 0]);
+
+        
+
+
+      }
+      drawCircles();
+    </script>
+    </div>
 </body>
+
 </html>
