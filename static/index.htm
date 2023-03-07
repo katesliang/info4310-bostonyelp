@@ -6,7 +6,50 @@
     <script src="https://d3js.org/d3.v7.min.js"></script>
     <script src="https://d3js.org/topojson.v2.min.js"></script>
 
-    <style></style>
+    <style>
+        /* ALL TOOLTIP STYLES */
+        #tooltip {
+            position: absolute;
+            padding: 2px;
+            font: 12px sans-serif;
+            background: white;
+            border: 3px solid black;
+            border-radius: 2px;
+            pointer-events: none;
+            opacity: 0;
+
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #tooltip .row-1,
+        #tooltip .row-2,
+        #tooltip .row-3 {
+            display: flex;
+            align-items: center;
+        }
+
+        #tooltip p {
+            margin-top: 5px;
+            margin-bottom: 5px;
+            font-size: 15px;
+        }
+
+        #tooltip .row-2 #rating {
+            padding-right: 5px;
+        }
+
+        #tooltip .row-2 #review-count {
+            padding-left: 5px;
+        }
+
+        #tooltip .row-3 p {
+            width: 300px;
+            margin-left: 10px;
+            margin-right: 10px;
+        }
+    </style>
 
 </head>
 
@@ -14,7 +57,18 @@
     <div class="title">
         <h1>Boston Restaurants</h1>
     </div>
-
+    <div id="tooltip">
+        <div class="row-1">
+            <h1 id="restaurant-title"></h1>
+        </div>
+        <div class="row-2">
+            <p id="rating"></p>
+            <p id="review-count"></p>
+        </div>
+        <div class="row-3">
+            <p id="snippet-text"></p>
+        </div>
+    </div>
     <svg id="bubbleplot" height="900" width="900"></svg>
 
     <script>
@@ -98,8 +152,9 @@
                     .attr("stroke", "black")
                     .attr("stroke-width", 4)
                     .style("opacity", 1)
-                console.log(d.longitudeDistance)
-                console.log(d.latitudeDistance)
+
+                updateTooltip(d)
+
             });
 
             circles.on("mouseout", function (event, d) {
@@ -108,7 +163,25 @@
                     .attr("stroke", "")
                     .attr("stroke-width", 1)
                     .style("opacity", 0.5)
+
+                d3.select('#tooltip')
+                    .transition().duration(200)
+                    .style('opacity', 0)
+
             });
+
+            function updateTooltip(row) {
+                d3.select('#tooltip')
+                    .transition().duration(200)
+                    .style('opacity', 1)
+                    .style("left", (event.pageX - 150) + "px")
+                    .style("top", (event.pageY - 200) + "px")
+
+                d3.select("#restaurant-title").text(row.name)
+                d3.select("#rating").text("Rating: " + row.rating)
+                d3.select("#review-count").text("Review Count: " + row.review_count)
+                d3.select("#snippet-text").text('"' + row.snippet_text + '"')
+            }
 
         }
         drawPlot();
