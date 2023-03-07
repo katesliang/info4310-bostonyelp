@@ -15,9 +15,7 @@
         <h1>Boston Restaurants</h1>
     </div>
 
-    <div class="content">
-      <svg id="bubbleplot" height="900" width="900"></svg>
-    </div>
+    <svg id="bubbleplot" height="900" width="900"></svg>
     
     <script>
       const svg = d3.select("#bubbleplot");
@@ -26,20 +24,60 @@
       const height = svg.attr("height");
       const chartWidth = width - margins.left - margins.right;
       const chartHeight = height - margins.top - margins.bottom;
-      let chartArea = svg.append("g").attr("id", "points").attr("transform",`translate(${margin.left}, ${margin.top}`);
+      let chartArea = svg.append("g");
 
       const drawCircles = async () => {
         const yelpData = await d3.csv("yelp_boston.csv");
-        console.log(yelpData);
 
-        const xExtent = d3.extent(yelpData, d => d.latitude);
-        const xScale = d3.scaleLinear().domain(xExtent).range([0, chartWidth]);
+        yelpData.forEach(d => {
+          d.longitude = Number(d.longitude);
+          d.latitude = Number(d.latitude);
+          d.rating = Number(d.rating);
+        })
 
-        const yExtent = d3.extent(yelpData, d => d.longtitude);
-        const yScale = d3.scaleLinear().domain(yExtent).range([chartHeight, 0]);
+        console.log(yelpData)
 
-        
+        const minRadius = 5;
+        const maxRadius = 30;
 
+        const xExtent = d3.extent(yelpData, d => d.longitude);
+        const xScale = d3.scaleLinear().domain(xExtent).range([maxRadius * 2, chartWidth - maxRadius * 2]);
+
+        const yExtent = d3.extent(yelpData, d => d.latitude);
+        const yScale = d3.scaleLinear().domain(yExtent).range([chartHeight - maxRadius * 2, maxRadius * 2]);
+
+        const sizeExtent = d3.extent(yelpData, d => d.rating);
+        const sizeScale = d3.scaleLinear().domain(sizeExtent).range([minRadius, maxRadius]);
+
+        const colors = ["#a6cee3","#1f78b4","#b2df8a","#33a02c","#fb9a99","#e31a1c","#fdbf6f","#ff7f00","#cab2d6","#6a3d9a","#ffff99", "#4e79a7","#f28e2c","#e15759","#76b7b2","#59a14f","#edc949","#af7aa1"];
+        const colorExtent = new Set(yelpData.map(d => d.search_category))
+        const colorScale = d3.scaleOrdinal().domain(colorExtent).range(colors);
+
+        const circles = chartArea.selectAll("circle.point").data(yelpData)
+                                 .join("circle")
+                                 .attr("class", "point")
+                                 .attr("label", d => d.name)
+                                 .attr("cx", d => xScale(d.longitude))
+                                 .attr("cy", d => yScale(d.latitude))
+                                 .attr("r", d => sizeScale(d.rating))
+                                 .attr("opacity", 0.8)
+                                 .attr("fill", d => colorScale(d.search_category));
+   
+
+        const updateNodePos = () => {
+          circles.attr("cx", d => d.x)
+                  .attr("cy", d => d.y)
+        }
+
+        var simulation = d3.forceSimulation()
+                           .nodes(yelpData)
+                           .force("ypos", d3.forceY()
+                                            .y(chartHeight / 2))
+                           .force("xpos", d3.forceX()
+                                            .x(chartWidth / 2))
+                           .force("collide", d3.forceCollide().radius(d => sizeScale(d.rating) + 1))
+                           .force("center", d3.forceCenter(chartHeight / 2, chartWidth / 2))
+                           .on("tick", updateNodePos);
 
       }
       drawCircles();

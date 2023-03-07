@@ -1,4 +1,4 @@
-name,url,review_count,categories,rating,snippet_text,location,neighborhood,latitude,longitude,search category
+name,url,review_count,categories,rating,snippet_text,location,neighborhood,latitude,longitude,search_category
 Wheelhouse,http://www.yelp.com/biz/wheelhouse-boston-3,101,"[[""Breakfast & Brunch"", ""breakfast_brunch""], [""Burgers"", ""burgers""], [""Sandwiches"", ""sandwiches""]]",4.5,"After going to Wheelhouse, you'll never order a Dunkin Donuts' breakfast sandwich ever again. Well, you might, but you won't enjoy it.
 
 This place has the...","{""cross_streets"": ""Milk St & Batterymarch Arm"", ""city"": ""Boston"", ""display_address"": [""63 Broad St"", ""Financial District"", ""Boston, MA 02109""], ""geo_accuracy"": 9.5, ""neighborhoods"": [""Financial District""], ""postal_code"": ""02109"", ""country_code"": ""US"", ""address"": [""63 Broad St""], ""coordinate"": {""latitude"": 42.3579261, ""longitude"": -71.0539618}, ""state_code"": ""MA""}",Financial District,42.3579261,-71.0539618,restaurants
