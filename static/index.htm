@@ -196,70 +196,30 @@
                 .attr("euclidean-dist", d => d.data.euclideanDistance)
                 .style("fill", d => colorScale(d.data.search_category) );
 
-            // const xExtent = d3.extent(yelpData, d => d.longitudeDistance);
-            // const xScale = d3.scaleLinear().domain(xExtent).range([maxRadius * 2, chartWidth - maxRadius * 2]);
-
-            // const yExtent = d3.extent(yelpData, d => d.latitudeDistance);
-            // const yScale = d3.scaleLinear().domain(yExtent).range([chartHeight - maxRadius * 2, maxRadius * 2]);
-
-            // const circles = chartArea.selectAll("circle.point").data(yelpData)
-            //     .join("circle")
-            //     .attr("class", "point")
-            //     .attr("label", d => d.name)
-            //     .attr("cx", d => xScale(d.longitudeDistance))
-            //     .attr("cy", d => yScale(d.latitudeDistance))
-            //     .attr("r", d => sizeScale(d.rating))
-            //     .attr("opacity", 0.8)
-            //     .attr("fill", d => colorScale(d.search_category));
-
-            // const centerCircle = chartArea.append('circle')
-            //     .attr("class", "center")
-            //     .attr("label", "Current Location")
-            //     .attr("cx", chartHeight / 2)
-            //     .attr("cy", chartWidth / 2)
-            //     .attr("r", 5)
-            //     .attr("opacity", 1)
-            //     .attr("fill", "black");
-
-            // const updateNodePos = () => {
-            //     circles.attr("cx", d => d.x)
-            //         .attr("cy", d => d.y)
-            // }
-
-            // var simulation = d3.forceSimulation()
-            //     .nodes(yelpData)
-            //     .force("ypos", d3.forceY()
-            //         .y(chartHeight / 2))
-            //     .force("xpos", d3.forceX()
-            //         .x(chartWidth / 2))
-            //     .force("collide", d3.forceCollide().radius(d => sizeScale(d.rating) + 1))
-            //     .force("center", d3.forceCenter(chartHeight / 2, chartWidth / 2))
-            //     .on("tick", updateNodePos);
-
             // HOVER CARD INTERACTION
-            // circles.on("mouseover", function (event, d) {
-            //     d3.select(this)
-            //         .transition().duration(200)
-            //         .attr("stroke", "black")
-            //         .attr("stroke-width", 4)
-            //         .style("opacity", 1)
+            circles.on("mouseover", function (event, d) {
+                d3.select(this)
+                    .transition().duration(200)
+                    .attr("stroke", "black")
+                    .attr("stroke-width", 4)
+                    .style("opacity", 1)
 
-            //     updateTooltip(d)
+                updateTooltip(d)
 
-            // });
+            });
 
-            // circles.on("mouseout", function (event, d) {
-            //     d3.select(this)
-            //         .transition().duration(200)
-            //         .attr("stroke", "")
-            //         .attr("stroke-width", 1)
-            //         .style("opacity", 0.5)
+            circles.on("mouseout", function (event, d) {
+                d3.select(this)
+                    .transition().duration(200)
+                    .attr("stroke", "")
+                    .attr("stroke-width", 1)
+                    .style("opacity", 0.5)
 
-            //     d3.select('#tooltip')
-            //         .transition().duration(200)
-            //         .style('opacity', 0)
+                d3.select('#tooltip')
+                    .transition().duration(200)
+                    .style('opacity', 0)
 
-            // });
+            });
 
             function updateTooltip(row) {
                 d3.select('#tooltip')
