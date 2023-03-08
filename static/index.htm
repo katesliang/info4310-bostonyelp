@@ -164,21 +164,25 @@
             const maxRadius = 30;
 
             // Drawing the plot 
+            const sizeExtent = d3.extent(yelpData, d => d.rating);
+            const sizeScale = d3.scaleLinear().domain(sizeExtent).range([minRadius, maxRadius]);
+
+            const colors = ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a", "#ffff99", "#4e79a7", "#f28e2c", "#e15759", "#76b7b2", "#59a14f", "#edc949", "#af7aa1"];
+            const colorExtent = new Set(yelpData.map(d => d.search_category));
+            const colorScale = d3.scaleOrdinal().domain(colorExtent).range(colors);
+
             var pack = d3.pack()
                          .size([chartWidth, chartHeight])
-                         .padding(1.5);
+                         .padding(1.5)
+                         .radius(d => sizeScale(d.data.rating));
 
             var root = d3.hierarchy({children: yelpData})
-                         .count(d => d.euclideanDistance)
+                         .sum(d => d.euclideanDistance)
                          .sort(function (a, b) {
                             return a.data.euclideanDistance - b.data.euclideanDistance;
                          });
 
-            console.log(root)
-
-            const sizeExtent = d3.extent(yelpData, d => d.rating);
-            const sizeScale = d3.scaleLinear().domain(sizeExtent).range([minRadius, maxRadius]);
-            var node = chartArea.selectAll(".node")
+            var nodes = chartArea.selectAll(".node")
                                 .data(pack(root).leaves())
                                 .enter().append("g")
                                 .attr("class", "node")
@@ -186,21 +190,17 @@
                                 .attr("transform", d => `translate(${d.x + 1},${d.y + 1})`);
                                 
             var color = d3.scaleOrdinal(d3.schemeCategory10);
-            node.append("circle")
+            nodes.append("circle")
                 .attr("id", d => d.id)
-                .attr("r", d => sizeScale(d.data.rating))
+                .attr("r", d => d.r)
                 .attr("euclidean-dist", d => d.data.euclideanDistance)
-                .style("fill", d => color(d.package) );
+                .style("fill", d => colorScale(d.data.search_category) );
 
             // const xExtent = d3.extent(yelpData, d => d.longitudeDistance);
             // const xScale = d3.scaleLinear().domain(xExtent).range([maxRadius * 2, chartWidth - maxRadius * 2]);
 
             // const yExtent = d3.extent(yelpData, d => d.latitudeDistance);
             // const yScale = d3.scaleLinear().domain(yExtent).range([chartHeight - maxRadius * 2, maxRadius * 2]);
-
-            // const colors = ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a", "#ffff99", "#4e79a7", "#f28e2c", "#e15759", "#76b7b2", "#59a14f", "#edc949", "#af7aa1"];
-            // const colorExtent = new Set(yelpData.map(d => d.search_category))
-            // const colorScale = d3.scaleOrdinal().domain(colorExtent).range(colors);
 
             // const circles = chartArea.selectAll("circle.point").data(yelpData)
             //     .join("circle")
