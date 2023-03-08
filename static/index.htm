@@ -122,7 +122,7 @@
         let chartArea = svg.append("g");
 
         const drawPlot = async () => {
-            const yelpData = await d3.csv("yelp_boston.csv");
+            const yelpData = await d3.json("data.json");
             let categories = []
 
             yelpData.forEach(d => {
@@ -132,8 +132,11 @@
                 d.longitudeDistance = Number(Math.abs(d.longitude - currentLocation[1]));
                 d.euclideanDistance = Number(Math.sqrt(Math.pow(d.latitudeDistance, 2) + Math.pow(d.longitudeDistance, 2)));
                 d.rating = Number(d.rating);
-                if (!categories.includes(d.search_category)) {
-                    categories.push(d.search_category)
+                for(let i = 0; i < d.categories_list.length; i++){
+                    category = d.categories_list[i][0]
+                    if (!categories.includes(category)) {
+                        categories.push(category)
+                    }
                 }
             })
 
@@ -162,35 +165,64 @@
             })
 
             // FILTERING 
-            d3.selectAll(".ratingsBox").on("change", filterRatings);
-            d3.selectAll(".priceBox").on("change", filterPrice);
+            filterData()
 
-            var filteredData = filterRatings();
+            d3.selectAll("#select-category").on("change", filterData)
+            d3.selectAll(".ratingsBox").on("change", filterData);
+            d3.selectAll(".priceBox").on("change", filterData);
+
+            function filterData(){
+                chartArea.remove()
+
+                chartArea = svg.append('g')
+
+                let selectCategory = document.getElementById("select-category")
+                var ratingsFiltered = filterRatings()
+                var priceFiltered = filterPrice()
+
+                var intersection = ratingsFiltered.filter(value => priceFiltered.includes(value));
+                
+                var filteredData = []
+
+                if(selectCategory.value != "None"){
+                    for(let i = 0; i < intersection.length; i++){
+                        for(let j = 0; j < intersection[i].categories_list.length; j++){
+                            if(intersection[i].categories_list[j][0] == selectCategory.value){
+                                filteredData.push(intersection[i])
+                            }
+                        }
+                    }
+                } else {
+                    filteredData = intersection
+                }
+
+                plotCircles(filteredData)
+            }
 
             function filterRatings() {
                 var checkBoxes = document.getElementsByClassName('ratingsBox');
 
                 var values = []
-                if(values.length == 0){
-                    return yelpData
-                }
-
                 for (let i = 0; i < checkBoxes.length; i++) {
                     if (checkBoxes[i].checked) {
                         values.push(Number(checkBoxes[i].value))
                     }
                 }
-                
-                var filteredData = yelpData.filter(function(d) {
-                    for(let i = 0; i < values.length; i++){
-                        if(d.rating >= values[i] && d.rating < values[i] + 1) {
-                            return true
-                        }
-                    }
-                    return false
-                });
 
-                return filteredData
+                if(values.length == 0){
+                    return yelpData
+                } else {
+                    var filteredData = yelpData.filter(function(d) {
+                        for(let i = 0; i < values.length; i++){
+                            if(d.rating >= values[i] && d.rating < values[i] + 1) {
+                                return true
+                            }
+                        }
+                        return false
+                    });
+                    
+                    return filteredData
+                }
             }
 
             function filterPrice() {
@@ -198,80 +230,89 @@
                 var values = []
                 for (let i = 0; i < checkBoxes.length; i++) {
                     if (checkBoxes[i].checked) {
-                        values.push(Number(checkBoxes[i].value))
+                        values.push(checkBoxes[i].value)
                     }
                 }
             
-                filteredData = yelpData.filter(function(d) {
-                    for(let i = 0; i < values.length; i++){
-                        if(d.price == values[i]) {
-                            return true
+                if(values.length == 0){
+                    return yelpData
+                } else {
+                    var filteredData = yelpData.filter(function(d) {
+                        for(let i = 0; i < values.length; i++){
+                            if(d.price == values[i]) {
+                                return true
+                            }
                         }
-                    }
-                    return false
-                });
-                console.log(filteredData)
+                        return false
+                    });
+                    
+                    return filteredData
+                }
             }
-            const minRadius = 5;
-            const maxRadius = 30;
 
             // Drawing the plot 
-            const sizeExtent = d3.extent(yelpData, d => d.rating);
-            const sizeScale = d3.scaleLinear().domain(sizeExtent).range([minRadius, maxRadius]);
+            function plotCircles(data){
+                const minRadius = 5;
+                const maxRadius = 30;
 
-            const colors = ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a", "#ffff99", "#4e79a7", "#f28e2c", "#e15759", "#76b7b2", "#59a14f", "#edc949", "#af7aa1"];
-            const colorExtent = new Set(yelpData.map(d => d.search_category));
-            const colorScale = d3.scaleOrdinal().domain(colorExtent).range(colors);
+                const sizeExtent = d3.extent(data, d => d.rating);
+                const sizeScale = d3.scaleLinear().domain(sizeExtent).range([minRadius, maxRadius]);
 
-            var pack = d3.pack()
-                         .size([chartWidth, chartHeight])
-                         .padding(1.5)
-                         .radius(d => sizeScale(d.data.rating));
+                const colors = ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a", "#ffff99", "#4e79a7", "#f28e2c", "#e15759", "#76b7b2", "#59a14f", "#edc949", "#af7aa1"];
+                const colorExtent = new Set(data.map(d => d.categories_list[0]));
+                const colorScale = d3.scaleOrdinal().domain(colorExtent).range(colors);
 
-            var root = d3.hierarchy({children: yelpData})
-                         .sum(d => d.euclideanDistance)
-                         .sort(function (a, b) {
-                            return a.data.euclideanDistance - b.data.euclideanDistance;
-                         });
+                var pack = d3.pack()
+                            .size([chartWidth, chartHeight])
+                            .padding(1.5)
+                            .radius(d => sizeScale(d.data.rating));
 
-            var nodes = chartArea.selectAll(".node")
-                                .data(pack(root).leaves())
-                                .enter().append("g")
-                                .attr("class", "node")
-                                .attr("euclidean-dist", d => d.data.euclideanDistance)
-                                .attr("transform", d => `translate(${d.x + 1},${d.y + 1})`);
-                                
-            var color = d3.scaleOrdinal(d3.schemeCategory10);
-            nodes.append("circle")
-                .attr("id", d => d.id)
-                .attr("r", d => d.r)
-                .attr("euclidean-dist", d => d.data.euclideanDistance)
-                .style("fill", d => colorScale(d.data.search_category) );
+                var root = d3.hierarchy({children: data})
+                            .sum(d => d.euclideanDistance)
+                            .sort(function (a, b) {
+                                return a.data.euclideanDistance - b.data.euclideanDistance;
+                            });
+
+                var nodes = chartArea.selectAll(".node")
+                                    .data(pack(root).leaves())
+                                    .enter().append("g")
+                                    .attr("class", "node")
+                                    .attr("euclidean-dist", d => d.data.euclideanDistance)
+                                    .attr("transform", d => `translate(${d.x + 1},${d.y + 1})`);
+                                    
+                var color = d3.scaleOrdinal(d3.schemeCategory10);
+                nodes.append("circle")
+                    .attr("id", d => d.id)
+                    .attr("r", d => d.r)
+                    .attr("euclidean-dist", d => d.data.euclideanDistance)
+                    .style("fill", d => colorScale(d.data.categories_list[0]) );
+            
+            }
 
             // HOVER CARD INTERACTION
-            circles.on("mouseover", function (event, d) {
-                d3.select(this)
-                    .transition().duration(200)
-                    .attr("stroke", "black")
-                    .attr("stroke-width", 4)
-                    .style("opacity", 1)
+            // nodes.on("mouseover", function (event, d) {
+            //     d3.select(this)
+            //         .transition().duration(200)
+            //         .attr("stroke", "black")
+            //         .attr("stroke-width", 4)
+            //         .style("opacity", 1)
 
-                updateTooltip(d)
+            //     updateTooltip(d)
 
-            });
+            // });
 
-            circles.on("mouseout", function (event, d) {
-                d3.select(this)
-                    .transition().duration(200)
-                    .attr("stroke", "")
-                    .attr("stroke-width", 1)
-                    .style("opacity", 0.5)
+            // circles.on("mouseout", function (event, d) {
+            //     d3.select(this)
+            //         .transition().duration(200)
+            //         .attr("stroke", "")
+            //         .attr("stroke-width", 1)
+            //         .style("opacity", 0.5)
 
-                d3.select('#tooltip')
-                    .transition().duration(200)
-                    .style('opacity', 0)
+            //     d3.select('#tooltip')
+            //         .transition().duration(200)
+            //         .style('opacity', 0)
 
-            });
+            // });
 
             function updateTooltip(row) {
                 d3.select('#tooltip')
