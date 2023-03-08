@@ -84,24 +84,25 @@
             </div>
             <div id="ratings">
                 <p>Rating</p>
-                <input type="checkbox" id="one-star" name="chk" value="one">
+                <input class="ratingsBox" type="checkbox" id="one-star" name="chk" value="1">
                 <label for="one-star">⭐</label>
-                <input type="checkbox" id="two-star" name="chk" value="two">
+                <input class="ratingsBox" type="checkbox" id="two-star" name="chk" value="2">
                 <label for="two-star">⭐⭐</label>
-                <input type="checkbox" id="three-star" name="chk" value="three">
+                <input class="ratingsBox" type="checkbox" id="three-star" name="chk" value="3">
                 <label for="three-star">⭐⭐⭐</label>
-                <input type="checkbox" id="four-star" name="chk" value="four">
+                <input class="ratingsBox" type="checkbox" id="four-star" name="chk" value="4">
                 <label for="four-star">⭐⭐⭐⭐</label>
-                <input type="checkbox" id="five-star" name="chk" value="five">
+                <input class="ratingsBox" type="checkbox" id="five-star" name="chk" value="5">
                 <label for="five-star">⭐⭐⭐⭐⭐</label>
+                </div>
             </div>
             <div id="prices">
                 <p>Price</p>
-                <input type="checkbox" id="one-dollar" name="chk" value="one">
+                <input class="priceBox" type="checkbox" id="one-dollar" name="chk" value="$">
                 <label for="one-dollar">$</label>
-                <input type="checkbox" id="two-dollar" name="chk" value="two">
+                <input class="priceBox" type="checkbox" id="two-dollar" name="chk" value="$$">
                 <label for="two-dollar">$$</label>
-                <input type="checkbox" id="three-dollar" name="chk" value="three">
+                <input class="priceBox" type="checkbox" id="three-dollar" name="chk" value="$$$">
                 <label for="three-dollar">$$$</label>
             </div>
         </div>
@@ -159,6 +160,57 @@
 
             })
 
+            // FILTERING 
+            d3.selectAll(".ratingsBox").on("change", filterRatings);
+            d3.selectAll(".priceBox").on("change", filterPrice);
+
+            var filteredData = filterRatings();
+
+            function filterRatings() {
+                var checkBoxes = document.getElementsByClassName('ratingsBox');
+
+                var values = []
+                if(values.length == 0){
+                    return yelpData
+                }
+
+                for (let i = 0; i < checkBoxes.length; i++) {
+                    if (checkBoxes[i].checked) {
+                        values.push(Number(checkBoxes[i].value))
+                    }
+                }
+                
+                var filteredData = yelpData.filter(function(d) {
+                    for(let i = 0; i < values.length; i++){
+                        if(d.rating >= values[i] && d.rating < values[i] + 1) {
+                            return true
+                        }
+                    }
+                    return false
+                });
+
+                return filteredData
+            }
+
+            function filterPrice() {
+                var checkBoxes = document.getElementsByClassName('priceBox');
+                var values = []
+                for (let i = 0; i < checkBoxes.length; i++) {
+                    if (checkBoxes[i].checked) {
+                        values.push(Number(checkBoxes[i].value))
+                    }
+                }
+            
+                filteredData = yelpData.filter(function(d) {
+                    for(let i = 0; i < values.length; i++){
+                        if(d.price == values[i]) {
+                            return true
+                        }
+                    }
+                    return false
+                });
+                console.log(filteredData)
+            }
             const minRadius = 5;
             const maxRadius = 30;
 
@@ -175,7 +227,7 @@
             const colorExtent = new Set(yelpData.map(d => d.search_category))
             const colorScale = d3.scaleOrdinal().domain(colorExtent).range(colors);
 
-            const circles = chartArea.selectAll("circle.point").data(yelpData)
+            const circles = chartArea.selectAll("circle.point").data(filteredData)
                 .join("circle")
                 .attr("class", "point")
                 .attr("label", d => d.name)
