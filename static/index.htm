@@ -63,7 +63,6 @@
         }
 
         .title {
-            color: #2E3840;
             width: 100%;
             text-align: center;
             align-items: center;
@@ -74,6 +73,13 @@
 
         .title h1 {
             padding: 15;
+            margin-top: 5;
+            margin-bottom: 5;
+        }
+
+        #header p {
+            margin: 0;
+            margin-bottom: 10px;
         }
 
         #logo {
@@ -125,6 +131,10 @@
             margin: 20px;
         }
 
+        #filters p {
+            padding: 5;
+        }
+
         #inputandfilters {
             width: 50%;
         }
@@ -166,6 +176,16 @@
             border: solid #a2b5cd;
             border-radius: 20px;
             margin: 20px;
+        }
+
+        #recommendation h1 {
+            display: flex;
+            align-items: center;
+        }
+
+        #most-recommended {
+            margin-left: 20px;
+            margin-bottom: 0;
         }
 
         #recommend-title {
@@ -227,6 +247,7 @@
                 <div class="row-1">
                     <h1 id="restaurant-title"></h1>
                 </div>
+                <p id="restaurant-distance"></p>
                 <div class="row-2">
                     <p id="rating"></p>
                     <p id="review-count"></p>
@@ -240,10 +261,10 @@
 
         <div id="inputandfilters">
             <div id="cooranddis">
-                <p> First, please use <a href="https://www.latlong.net/convert-address-to-lat-long.html"> this link </a>
-                    to determine the longitude and latitude of your origin location.</p>
-                <p> These default values of longitude and latitude are that of the Boston City Hall and setting your
-                    origin as there.</p>
+                <p> The further a bubble is from the center of the visualization is the further the restaurant is from
+                    your location. The default values of longitude and latitude are that of the Boston City Hall.</p>
+                <p> Use <a href="https://www.latlong.net/convert-address-to-lat-long.html" target="_blank"> this
+                        link</a> to determine the longitude and latitude of your location.</p>
                 <div id="coordinates_input">
                     <!-- look up the 'maximum and minimum' longitude and latitude coordinates of boston-->
                     <div>
@@ -259,9 +280,11 @@
                 </div>
             </div>
             <div id="filters">
+                <p> Use these filters to narrow down your search for the perfect restaurant. Your most recommended
+                    restaurant will update as well, below.</p>
                 <div id="disandcate">
                     <div class="fil">
-                        <label for="distance">Distance(in miles):</label>
+                        <label for="distance">Distance(in miles from your current location):</label>
                         <input type="range" id="distance" name="distance" min="0" max="30" step="5" value="30"
                             oninput="this.nextElementSibling.value = this.value">
                         <output>30</output>
@@ -316,6 +339,7 @@
                 </div>
             </div>
             <div id="recommendation" class="recommend-contain">
+                <h2 id="most-recommended">Most Recommended...</h2>
                 <div id="recommend-title">
                     <h1 id="recommendation-title">Most Recommended</h1>
                     <img id="recommend-yelp-icon" src="yelp-icon.png" alt="Yelp Icon">
@@ -569,6 +593,7 @@
                     .style("top", (event.pageY - 200) + "px")
 
                 d3.select("#restaurant-title").text(row.name_x)
+                d3.select("#restaurant-distance").text((row.euclideanDistance).toFixed(2) + " miles from you")
                 d3.select("#rating").text("Rating: " + row.rating)
                 d3.select("#review-count").text("Review Count: " + row.review_count)
                 d3.select("#snippet-text").text('"' + row.snippet_text + '"')
