@@ -54,6 +54,10 @@
       /* background-color: #F9DBBB; */
       background-color: #F8F4EC;
       font-family: "Gill Sans",sans-serif;
+      font-size:25;
+    }
+    #header{
+      text-align: center;
     }
     .title {
       font-size: 50;
@@ -144,12 +148,15 @@
 </head>
 
 <body>
-  
-  <div class="title">
-    <h1>Boston </h1>
-    <img id = "logo" src="Yelp_Logo.png" alt="Yelp Logo">
-    <h1>Recommendations</h1>
+  <div id = "header">
+    <div class="title">
+      <h1>Boston </h1>
+      <img id = "logo" src="Yelp_Logo.png" alt="Yelp Logo">
+      <h1>Recommendations</h1>
+    </div> 
+    <p>Amy Huang (ach243), Jonna Chen (jc2627), Kate Liang (ksl67), Stephanie Zhang (swz8)</p>
   </div>
+  
   <div id = "visandfil"> 
     <div id="visualization">
       <div id="tooltip">
@@ -186,7 +193,7 @@
       <div id = "filters">
         <div id="disandcate">
           <div class = "fil">
-            <label for="distance">Distance:</label>
+            <label for="distance">Distance(in miles):</label>
             <input type="range" id="distance" name="distance"  min="0" max="30" step = "5" value = "30" oninput="this.nextElementSibling.value = this.value">
             <output>30</output>
           </div>
