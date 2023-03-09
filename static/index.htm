@@ -53,6 +53,14 @@
             margin-left: 10px;
             margin-right: 10px;
         }
+        #coordinates {
+          width: 100%;
+          display: flex;
+          justify-content: space-between;
+        }
+        .input {
+          width: 150px;
+        }
     </style>
 
 </head>
@@ -76,6 +84,22 @@
         </div>
         <svg id="bubbleplot" height="900" width="900"></svg>
         <div id="filters">
+            <p> Please use ___ to determine the longitude and latitude of your origin location</p>
+            <div id = "coordinates">
+              <!-- look up the 'maximum and minimum' longitude and latitude coordinates of boston-->
+              <div>
+                <label for="longitude">Longitude:</label>
+                <input class = "input" type="number" id="longitude" name="longitude" min="10" max="100" value = -71.058884> 
+              </div>
+              <div>
+                <label for="latitude">Latitude:</label>
+                <input class = "input" type="number" id="latitude" name="latitude" min="10" max="100" value = 42.360081>
+              </div>
+            </div>
+            <div>
+              <label for="distance">Distance</label>
+              <input type="range" id="distance" name="distance"  min="0" max="100" value = 100>
+            </div>
             <div id="categories">
                 <p>Category</p>
                 <select id="select-category">
@@ -118,6 +142,16 @@
         // Track current location in latitude and longitude
         // Default: Triangulated center of Boston
         let currentLocation = [42.360081, -71.058884]
+
+        let longitude_val = document.getElementById("longitude").value;
+        // document.getElementById("select-x-var").addEventListener("change", (e) => {})
+
+        let latitude_val = document.getElementById("latitude").value;
+        // document.getElementById("select-x-var").addEventListener("change", (e) => {})
+        let distance = document.getElementById("distance").value;
+
+        console.log(longitude_val,latitude_val,distance)
+
         let chartArea = svg.append("g");
 
         const drawPlot = async () => {
