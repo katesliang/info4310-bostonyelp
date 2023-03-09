@@ -1,364 +1,381 @@
 <html>
 
 <head>
-    <title>INFO4310 - Boston Restaurants</title>
-
-    <script src="https://d3js.org/d3.v7.min.js"></script>
-    <script src="https://d3js.org/topojson.v2.min.js"></script>
-
-    <style>
-        #visualization {
-            display: flex;
-        }
-
-        /* ALL TOOLTIP STYLES */
-        #tooltip {
-            position: absolute;
-            padding: 2px;
-            font: 12px sans-serif;
-            background: white;
-            border: 3px solid black;
-            border-radius: 2px;
-            pointer-events: none;
-            opacity: 0;
-
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-
-        #tooltip .row-1,
-        #tooltip .row-2,
-        #tooltip .row-3 {
-            display: flex;
-            align-items: center;
-        }
-
-        #tooltip p {
-            margin-top: 5px;
-            margin-bottom: 5px;
-            font-size: 15px;
-        }
-
-        #tooltip .row-2 #rating {
-            padding-right: 5px;
-        }
-
-        #tooltip .row-2 #review-count {
-            padding-left: 5px;
-        }
-
-        #tooltip .row-3 p {
-            width: 300px;
-            margin-left: 10px;
-            margin-right: 10px;
-        }
-        #coordinates {
-          width: 100%;
-          display: flex;
-          justify-content: space-between;
-        }
-        .input {
-          width: 150px;
-        }
-    </style>
-
+  <title>INFO4310 - Boston Restaurants</title>
+  
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://d3js.org/topojson.v2.min.js"></script>
+  
+  <style>
+    #visualization {
+      display: flex;
+    }
+    
+    /* ALL TOOLTIP STYLES */
+    #tooltip {
+      position: absolute;
+      padding: 2px;
+      font: 12px sans-serif;
+      background: white;
+      border: 3px solid black;
+      border-radius: 2px;
+      pointer-events: none;
+      opacity: 0;
+      
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    
+    #tooltip .row-1,
+    #tooltip .row-2,
+    #tooltip .row-3 {
+      display: flex;
+      align-items: center;
+    }
+    
+    #tooltip p {
+      margin-top: 5px;
+      margin-bottom: 5px;
+      font-size: 15px;
+    }
+    
+    #tooltip .row-2 #rating {
+      padding-right: 5px;
+    }
+    
+    #tooltip .row-2 #review-count {
+      padding-left: 5px;
+    }
+    
+    #tooltip .row-3 p {
+      width: 300px;
+      margin-left: 10px;
+      margin-right: 10px;
+    }
+    #coordinates {
+      width: 100%;
+      display: flex;
+      justify-content: space-between;
+    }
+    .input {
+      width: 150px;
+    }
+  </style>
+  
 </head>
 
 <body>
-    <div class="title">
-        <h1>Boston Restaurants</h1>
+  <div class="title">
+    <h1>Boston Restaurants</h1>
+  </div>
+  <div id="visualization">
+    <div id="tooltip">
+      <div class="row-1">
+        <h1 id="restaurant-title"></h1>
+      </div>
+      <div class="row-2">
+        <p id="rating"></p>
+        <p id="review-count"></p>
+      </div>
+      <div class="row-3">
+        <p id="snippet-text"></p>
+      </div>
     </div>
-    <div id="visualization">
-        <div id="tooltip">
-            <div class="row-1">
-                <h1 id="restaurant-title"></h1>
-            </div>
-            <div class="row-2">
-                <p id="rating"></p>
-                <p id="review-count"></p>
-            </div>
-            <div class="row-3">
-                <p id="snippet-text"></p>
-            </div>
+    <svg id="bubbleplot" height="900" width="900"></svg>
+    <div id="filters">
+      <p> Please use <a href="https://www.latlong.net/convert-address-to-lat-long.html"> this link </a> to first determine the longitude and latitude of your origin location.</p>
+      <p> These current values of longitude and latitude are that of the Boston City Hall and setting your origin as there.</p>
+      <div id = "coordinates">
+        <!-- look up the 'maximum and minimum' longitude and latitude coordinates of boston-->
+        <div>
+          <label for="longitude">Longitude:</label>
+          <input class = "input" type="number" id="longitude" name="longitude" min="10" max="100" value = -71.0594533> 
         </div>
-        <svg id="bubbleplot" height="900" width="900"></svg>
-        <div id="filters">
-            <p> Please use ___ to determine the longitude and latitude of your origin location</p>
-            <div id = "coordinates">
-              <!-- look up the 'maximum and minimum' longitude and latitude coordinates of boston-->
-              <div>
-                <label for="longitude">Longitude:</label>
-                <input class = "input" type="number" id="longitude" name="longitude" min="10" max="100" value = -71.058884> 
-              </div>
-              <div>
-                <label for="latitude">Latitude:</label>
-                <input class = "input" type="number" id="latitude" name="latitude" min="10" max="100" value = 42.360081>
-              </div>
-            </div>
-            <div>
-              <label for="distance">Distance</label>
-              <input type="range" id="distance" name="distance"  min="0" max="100" value = 100>
-            </div>
-            <div id="categories">
-                <p>Category</p>
-                <select id="select-category">
-                    <option value="None">None</option>
-                </select>
-            </div>
-            <div id="ratings">
-                <p>Rating</p>
-                <input class="ratingsBox" type="checkbox" id="one-star" name="chk" value="1">
-                <label for="one-star">⭐</label>
-                <input class="ratingsBox" type="checkbox" id="two-star" name="chk" value="2">
-                <label for="two-star">⭐⭐</label>
-                <input class="ratingsBox" type="checkbox" id="three-star" name="chk" value="3">
-                <label for="three-star">⭐⭐⭐</label>
-                <input class="ratingsBox" type="checkbox" id="four-star" name="chk" value="4">
-                <label for="four-star">⭐⭐⭐⭐</label>
-                <input class="ratingsBox" type="checkbox" id="five-star" name="chk" value="5">
-                <label for="five-star">⭐⭐⭐⭐⭐</label>
-                </div>
-            </div>
-            <div id="prices">
-                <p>Price</p>
-                <input class="priceBox" type="checkbox" id="one-dollar" name="chk" value="$">
-                <label for="one-dollar">$</label>
-                <input class="priceBox" type="checkbox" id="two-dollar" name="chk" value="$$">
-                <label for="two-dollar">$$</label>
-                <input class="priceBox" type="checkbox" id="three-dollar" name="chk" value="$$$">
-                <label for="three-dollar">$$$</label>
-            </div>
+        <div>
+          <label for="latitude">Latitude:</label>
+          <input class = "input" type="number" id="latitude" name="latitude" min="10" max="100" value = 42.3602613>
         </div>
+      </div>
+      <div>
+        <label for="distance">Distance</label>
+        <input type="range" id="distance" name="distance"  min="0" max="30" step = "5" value = "30">
+      </div>
+      <div id="categories">
+        <p>Category</p>
+        <select id="select-category">
+          <option value="None">None</option>
+        </select>
+      </div>
+      <div id="ratings">
+        <p>Rating</p>
+        <input class="ratingsBox" type="checkbox" id="one-star" name="chk" value="1">
+        <label for="one-star">⭐</label>
+        <input class="ratingsBox" type="checkbox" id="two-star" name="chk" value="2">
+        <label for="two-star">⭐⭐</label>
+        <input class="ratingsBox" type="checkbox" id="three-star" name="chk" value="3">
+        <label for="three-star">⭐⭐⭐</label>
+        <input class="ratingsBox" type="checkbox" id="four-star" name="chk" value="4">
+        <label for="four-star">⭐⭐⭐⭐</label>
+        <input class="ratingsBox" type="checkbox" id="five-star" name="chk" value="5">
+        <label for="five-star">⭐⭐⭐⭐⭐</label>
+      </div>
     </div>
+    <div id="prices">
+      <p>Price</p>
+      <input class="priceBox" type="checkbox" id="one-dollar" name="chk" value="$">
+      <label for="one-dollar">$</label>
+      <input class="priceBox" type="checkbox" id="two-dollar" name="chk" value="$$">
+      <label for="two-dollar">$$</label>
+      <input class="priceBox" type="checkbox" id="three-dollar" name="chk" value="$$$">
+      <label for="three-dollar">$$$</label>
+    </div>
+  </div>
+</div>
 
-    <script>
-        const svg = d3.select("#bubbleplot");
-        const margins = { top: 10, right: 10, bottom: 10, left: 10 };
-        const width = svg.attr("width");
-        const height = svg.attr("height");
-        const chartWidth = width - margins.left - margins.right;
-        const chartHeight = height - margins.top - margins.bottom;
+<script>
+  const svg = d3.select("#bubbleplot");
+  const margins = { top: 10, right: 10, bottom: 10, left: 10 };
+  const width = svg.attr("width");
+  const height = svg.attr("height");
+  const chartWidth = width - margins.left - margins.right;
+  const chartHeight = height - margins.top - margins.bottom;
+  
+  let chartArea = svg.append("g");
+  
+  const minRadius = 5;
+  const maxRadius = 30;
+  
+  const drawPlot = async () => {
+    const yelpData = await d3.json("data.json");
+    let categories = []
+    
+    let longitude_val = document.getElementById("longitude").value;
+    let latitude_val = document.getElementById("latitude").value;
 
-        // Track current location in latitude and longitude
-        // Default: Triangulated center of Boston
-        let currentLocation = [42.360081, -71.058884]
+    let distance = document.getElementById("distance").value;
+    document.getElementById("distance").addEventListener("change", (e) => {
+      distance = document.getElementById("distance").value;
+      console.log(longitude_val,latitude_val,distance)
+    })
+    
+    yelpData.forEach(d => {
+      d.latitude = Number(d.latitude);
+      d.longitude = Number(d.longitude);
+      d.rating = Number(d.rating);
+      d.latitudeDistance = Number(Math.abs(d.latitude - latitude_val) * 69); // One degree of latitude equals approximately 364,000 feet (69 miles)
+      d.longitudeDistance = Number(Math.abs(d.longitude - longitude_val)* 54.4); // One-degree of longitude equals 288,200 feet (54.6 miles)
+      d.euclideanDistance = Number(Math.sqrt(Math.pow(d.latitudeDistance, 2) + Math.pow(d.longitudeDistance, 2)));
 
-        let longitude_val = document.getElementById("longitude").value;
-        // document.getElementById("select-x-var").addEventListener("change", (e) => {})
+      // recalculates distance depending on change in longitude
+      document.getElementById("longitude").addEventListener("change", (e) => {
+        longitude_val = document.getElementById("longitude").value;
+        d.latitudeDistance = Number(Math.abs(d.latitude - latitude_val) * 69); // One degree of latitude equals approximately 364,000 feet (69 miles)
+        d.longitudeDistance = Number(Math.abs(d.longitude - longitude_val)* 54.4); // One-degree of longitude equals 288,200 feet (54.6 miles)
+        d.euclideanDistance = Number(Math.sqrt(Math.pow(d.latitudeDistance, 2) + Math.pow(d.longitudeDistance, 2)));
+      })
+      // recalculates distance depending on change in latitude
+      document.getElementById("latitude").addEventListener("change", (e) => {
+        latitude_val = document.getElementById("latitude").value;
+        d.latitudeDistance = Number(Math.abs(d.latitude - latitude_val) * 69); // One degree of latitude equals approximately 364,000 feet (69 miles)
+        d.longitudeDistance = Number(Math.abs(d.longitude - longitude_val)* 54.4); // One-degree of longitude equals 288,200 feet (54.6 miles)
+        d.euclideanDistance = Number(Math.sqrt(Math.pow(d.latitudeDistance, 2) + Math.pow(d.longitudeDistance, 2)));
+      })
 
-        let latitude_val = document.getElementById("latitude").value;
-        // document.getElementById("select-x-var").addEventListener("change", (e) => {})
-        let distance = document.getElementById("distance").value;
-
-        console.log(longitude_val,latitude_val,distance)
-
-        let chartArea = svg.append("g");
-
-        const minRadius = 5;
-        const maxRadius = 30;
-
-        const drawPlot = async () => {
-            const yelpData = await d3.json("data.json");
-            let categories = []
-
-            yelpData.forEach(d => {
-                d.latitude = Number(d.latitude);
-                d.longitude = Number(d.longitude);
-                d.latitudeDistance = Number(Math.abs(d.latitude - currentLocation[0]));
-                d.longitudeDistance = Number(Math.abs(d.longitude - currentLocation[1]));
-                d.euclideanDistance = Number(Math.sqrt(Math.pow(d.latitudeDistance, 2) + Math.pow(d.longitudeDistance, 2)));
-                d.rating = Number(d.rating);
-
-                switch (d["search category"]) {
-                    case "newamerican":
-                        d["search category"] = "New American"
-                        break;
-                    case "indpak":
-                        d["search category"] = "Indian-Pakistani"
-                        break;
-                    case "ethnicmarkets":
-                        d["search category"] = "Ethnic Markets"
-                        break;
-                    default:
-                        d["search category"] = d["search category"].charAt(0).toUpperCase() + d["search category"].slice(1)
-                }
-
-                if (!categories.includes(d["search category"])) {
-                    categories.push(d["search category"])
-                }
-
-            })
-
-            // Get all categories for dropdown filter
-            categories.forEach(c => {
-                d3.select("#select-category").append("option")
-                    .attr("value", c)
-                    .text(c);
-
-            })
-
-            // FILTERING 
-            filterData()
-
-            d3.selectAll("#select-category").on("change", filterData)
-            d3.selectAll(".ratingsBox").on("change", filterData);
-            d3.selectAll(".priceBox").on("change", filterData);
-
-            function filterData(){
-                chartArea.remove()
-
-                chartArea = svg.append('g')
-
-                let selectCategory = document.getElementById("select-category")
-                var ratingsFiltered = filterRatings()
-                var priceFiltered = filterPrice()
-
-                var intersection = ratingsFiltered.filter(value => priceFiltered.includes(value));
-                
-                var filteredData = []
-
-                if(selectCategory.value != "None"){
-                    for(let i = 0; i < intersection.length; i++){
-                        if(intersection[i]["search category"] == selectCategory.value){
-                            filteredData.push(intersection[i])
-                        }
-                    }
-                } else {
-                    filteredData = intersection
-                }
-
-                plotCircles(filteredData)
-            }
-
-            function filterRatings() {
-                var checkBoxes = document.getElementsByClassName('ratingsBox');
-
-                var values = []
-                for (let i = 0; i < checkBoxes.length; i++) {
-                    if (checkBoxes[i].checked) {
-                        values.push(Number(checkBoxes[i].value))
-                    }
-                }
-
-                if(values.length == 0){
-                    return yelpData
-                } else {
-                    var filteredData = yelpData.filter(function(d) {
-                        for(let i = 0; i < values.length; i++){
-                            if(d.rating >= values[i] && d.rating < values[i] + 1) {
-                                return true
-                            }
-                        }
-                        return false
-                    });
-                    
-                    return filteredData
-                }
-            }
-
-            function filterPrice() {
-                var checkBoxes = document.getElementsByClassName('priceBox');
-                var values = []
-                for (let i = 0; i < checkBoxes.length; i++) {
-                    if (checkBoxes[i].checked) {
-                        values.push(checkBoxes[i].value)
-                    }
-                }
-            
-                if(values.length == 0){
-                    return yelpData
-                } else {
-                    var filteredData = yelpData.filter(function(d) {
-                        for(let i = 0; i < values.length; i++){
-                            if(d.price == values[i]) {
-                                return true
-                            }
-                        }
-                        return false
-                    });
-                    
-                    return filteredData
-                }
-            }
-
-            // Drawing the plot 
-            function plotCircles(data){
-                const sizeExtent = d3.extent(yelpData, d => d.rating);
-                const sizeScale = d3.scaleLinear().domain(sizeExtent).range([minRadius, maxRadius]);
-
-                const colors = ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a", "#ffff99", "#4e79a7", "#f28e2c", "#e15759", "#76b7b2", "#59a14f", "#edc949", "#af7aa1"];
-                const colorScale = d3.scaleOrdinal().domain(categories).range(colors);
-
-                var pack = d3.pack()
-                            .size([chartWidth, chartHeight])
-                            .padding(1.5)
-                            .radius(d => sizeScale(d.data.rating));
-
-                var root = d3.hierarchy({children: data})
-                            .sum(d => d.euclideanDistance)
-                            .sort(function (a, b) {
-                                return a.data.euclideanDistance - b.data.euclideanDistance;
-                            });
-
-                var nodes = chartArea.selectAll(".node")
-                                    .data(pack(root).leaves())
-                                    .enter().append("g")
-                                    .attr("class", "node")
-                                    .attr("euclidean-dist", d => d.data.euclideanDistance)
-                                    .attr("transform", d => `translate(${d.x + 1},${d.y + 1})`);
-                                    
-                var color = d3.scaleOrdinal(d3.schemeCategory10);
-                nodes.append("circle")
-                    .attr("id", d => d.id)
-                    .attr("r", d => d.r)
-                    .attr("euclidean-dist", d => d.data.euclideanDistance)
-                    .style("fill", d => colorScale(d.data["search category"]) );
-            
-            }
-
-            // HOVER CARD INTERACTION
-            // nodes.on("mouseover", function (event, d) {
-            //     d3.select(this)
-            //         .transition().duration(200)
-            //         .attr("stroke", "black")
-            //         .attr("stroke-width", 4)
-            //         .style("opacity", 1)
-
-            //     updateTooltip(d)
-
-            // });
-
-            // circles.on("mouseout", function (event, d) {
-            //     d3.select(this)
-            //         .transition().duration(200)
-            //         .attr("stroke", "")
-            //         .attr("stroke-width", 1)
-            //         .style("opacity", 0.5)
-
-            //     d3.select('#tooltip')
-            //         .transition().duration(200)
-            //         .style('opacity', 0)
-
-            // });
-
-            function updateTooltip(row) {
-                d3.select('#tooltip')
-                    .transition().duration(200)
-                    .style('opacity', 1)
-                    .style("left", (event.pageX - 150) + "px")
-                    .style("top", (event.pageY - 200) + "px")
-
-                d3.select("#restaurant-title").text(row.name)
-                d3.select("#rating").text("Rating: " + row.rating)
-                d3.select("#review-count").text("Review Count: " + row.review_count)
-                d3.select("#snippet-text").text('"' + row.snippet_text + '"')
-            }
-
+      switch (d["search category"]) {
+        case "newamerican":
+        d["search category"] = "New American"
+        break;
+        case "indpak":
+        d["search category"] = "Indian-Pakistani"
+        break;
+        case "ethnicmarkets":
+        d["search category"] = "Ethnic Markets"
+        break;
+        default:
+        d["search category"] = d["search category"].charAt(0).toUpperCase() + d["search category"].slice(1)
+      }
+      
+      if (!categories.includes(d["search category"])) {
+        categories.push(d["search category"])
+      }
+    })
+    const extent = d3.extent(yelpData, d => d.euclideanDistance);
+    // Get all categories for dropdown filter
+    categories.forEach(c => {
+      d3.select("#select-category").append("option")
+      .attr("value", c)
+      .text(c);
+      
+    })
+    
+    // FILTERING 
+    filterData()
+    
+    d3.selectAll("#select-category").on("change", filterData)
+    d3.selectAll(".ratingsBox").on("change", filterData);
+    d3.selectAll(".priceBox").on("change", filterData);
+    d3.selectAll("#longitude").on("change", filterData);
+    d3.selectAll("#latitude").on("change", filterData);
+    d3.selectAll("#distance").on("change", filterData);
+    
+    function filterData(){
+      chartArea.remove()
+      
+      chartArea = svg.append('g')
+      
+      let selectCategory = document.getElementById("select-category")
+      var ratingsFiltered = filterRatings()
+      var priceFiltered = filterPrice()
+      
+      var intersection = ratingsFiltered.filter(value => priceFiltered.includes(value));
+      
+      var filteredData = []
+      
+      if(selectCategory.value != "None"){
+        for(let i = 0; i < intersection.length; i++){
+          if(intersection[i]["search category"] == selectCategory.value){
+            filteredData.push(intersection[i])
+          }
         }
-        drawPlot();
+      } else {
+        filteredData = intersection
+      }
+      
+      filteredData = filteredData.filter(function(d){ return d.euclideanDistance  <= distance })
+
+      plotCircles(filteredData)
+    }
+    
+    function filterRatings() {
+      var checkBoxes = document.getElementsByClassName('ratingsBox');
+      
+      var values = []
+      for (let i = 0; i < checkBoxes.length; i++) {
+        if (checkBoxes[i].checked) {
+          values.push(Number(checkBoxes[i].value))
+        }
+      }
+      
+      if(values.length == 0){
+        return yelpData
+      } else {
+        var filteredData = yelpData.filter(function(d) {
+          for(let i = 0; i < values.length; i++){
+            if(d.rating >= values[i] && d.rating < values[i] + 1) {
+              return true
+            }
+          }
+          return false
+        });
+        
+        return filteredData
+      }
+    }
+    
+    function filterPrice() {
+      var checkBoxes = document.getElementsByClassName('priceBox');
+      var values = []
+      for (let i = 0; i < checkBoxes.length; i++) {
+        if (checkBoxes[i].checked) {
+          values.push(checkBoxes[i].value)
+        }
+      }
+      
+      if(values.length == 0){
+        return yelpData
+      } else {
+        var filteredData = yelpData.filter(function(d) {
+          for(let i = 0; i < values.length; i++){
+            if(d.price == values[i]) {
+              return true
+            }
+          }
+          return false
+        });
+        
+        return filteredData
+      }
+    }
+    
+    
+    // Drawing the plot 
+    function plotCircles(data){
+      const sizeExtent = d3.extent(yelpData, d => d.rating);
+      const sizeScale = d3.scaleLinear().domain(sizeExtent).range([minRadius, maxRadius]);
+      
+      const colors = ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a", "#ffff99", "#4e79a7", "#f28e2c", "#e15759", "#76b7b2", "#59a14f", "#edc949", "#af7aa1"];
+      const colorScale = d3.scaleOrdinal().domain(categories).range(colors);
+      
+      var pack = d3.pack()
+      .size([chartWidth, chartHeight])
+      .padding(1.5)
+      .radius(d => sizeScale(d.data.rating));
+      
+      var root = d3.hierarchy({children: data})
+      .sum(d => d.euclideanDistance)
+      .sort(function (a, b) {
+        return a.data.euclideanDistance - b.data.euclideanDistance;
+      });
+      
+      var nodes = chartArea.selectAll(".node")
+      .data(pack(root).leaves())
+      .enter().append("g")
+      .attr("class", "node")
+      .attr("euclidean-dist", d => d.data.euclideanDistance)
+      .attr("transform", d => `translate(${d.x + 1},${d.y + 1})`);
+      
+      var color = d3.scaleOrdinal(d3.schemeCategory10);
+      nodes.append("circle")
+      .attr("id", d => d.id)
+      .attr("r", d => d.r)
+      .attr("euclidean-dist", d => d.data.euclideanDistance)
+      .style("fill", d => colorScale(d.data["search category"]) );
+      
+    }
+    
+    // HOVER CARD INTERACTION
+    // nodes.on("mouseover", function (event, d) {
+      //     d3.select(this)
+      //         .transition().duration(200)
+      //         .attr("stroke", "black")
+      //         .attr("stroke-width", 4)
+      //         .style("opacity", 1)
+      
+      //     updateTooltip(d)
+      
+      // });
+      
+      // circles.on("mouseout", function (event, d) {
+        //     d3.select(this)
+        //         .transition().duration(200)
+        //         .attr("stroke", "")
+        //         .attr("stroke-width", 1)
+        //         .style("opacity", 0.5)
+        
+        //     d3.select('#tooltip')
+        //         .transition().duration(200)
+        //         .style('opacity', 0)
+        
+        // });
+        
+        function updateTooltip(row) {
+          d3.select('#tooltip')
+          .transition().duration(200)
+          .style('opacity', 1)
+          .style("left", (event.pageX - 150) + "px")
+          .style("top", (event.pageY - 200) + "px")
+          
+          d3.select("#restaurant-title").text(row.name)
+          d3.select("#rating").text("Rating: " + row.rating)
+          d3.select("#review-count").text("Review Count: " + row.review_count)
+          d3.select("#snippet-text").text('"' + row.snippet_text + '"')
+        }
+        
+      }
+      drawPlot();
     </script>
-    </div>
+  </div>
 </body>
 
 </html>
