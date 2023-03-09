@@ -111,7 +111,7 @@
       display:flex;
       padding: 10;
     }
-
+    
     input[type='checkbox'] {
       width:30px;
       height:30px;
@@ -119,7 +119,7 @@
       border-radius:5px;
       border:2px solid #555;
     }
-
+    
   </style>
   
 </head>
@@ -244,7 +244,7 @@
       let distance = document.getElementById("distance").value;
       document.getElementById("distance").addEventListener("change", (e) => {
         distance = document.getElementById("distance").value;
-        console.log(longitude_val,latitude_val,distance)
+        console.log(longitude_val, latitude_val, distance)
       })
       
       yelpData.forEach(d => {
@@ -252,21 +252,21 @@
         d.longitude = Number(d.longitude);
         d.rating = Number(d.rating);
         d.latitudeDistance = Number(Math.abs(d.latitude - latitude_val) * 69); // One degree of latitude equals approximately 364,000 feet (69 miles)
-        d.longitudeDistance = Number(Math.abs(d.longitude - longitude_val)* 54.4); // One-degree of longitude equals 288,200 feet (54.6 miles)
+        d.longitudeDistance = Number(Math.abs(d.longitude - longitude_val) * 54.4); // One-degree of longitude equals 288,200 feet (54.6 miles)
         d.euclideanDistance = Number(Math.sqrt(Math.pow(d.latitudeDistance, 2) + Math.pow(d.longitudeDistance, 2)));
         
         // recalculates distance depending on change in longitude
         document.getElementById("longitude").addEventListener("change", (e) => {
           longitude_val = document.getElementById("longitude").value;
           d.latitudeDistance = Number(Math.abs(d.latitude - latitude_val) * 69); // One degree of latitude equals approximately 364,000 feet (69 miles)
-          d.longitudeDistance = Number(Math.abs(d.longitude - longitude_val)* 54.4); // One-degree of longitude equals 288,200 feet (54.6 miles)
+          d.longitudeDistance = Number(Math.abs(d.longitude - longitude_val) * 54.4); // One-degree of longitude equals 288,200 feet (54.6 miles)
           d.euclideanDistance = Number(Math.sqrt(Math.pow(d.latitudeDistance, 2) + Math.pow(d.longitudeDistance, 2)));
         })
         // recalculates distance depending on change in latitude
         document.getElementById("latitude").addEventListener("change", (e) => {
           latitude_val = document.getElementById("latitude").value;
           d.latitudeDistance = Number(Math.abs(d.latitude - latitude_val) * 69); // One degree of latitude equals approximately 364,000 feet (69 miles)
-          d.longitudeDistance = Number(Math.abs(d.longitude - longitude_val)* 54.4); // One-degree of longitude equals 288,200 feet (54.6 miles)
+          d.longitudeDistance = Number(Math.abs(d.longitude - longitude_val) * 54.4); // One-degree of longitude equals 288,200 feet (54.6 miles)
           d.euclideanDistance = Number(Math.sqrt(Math.pow(d.latitudeDistance, 2) + Math.pow(d.longitudeDistance, 2)));
         })
         
@@ -307,7 +307,7 @@
       d3.selectAll("#latitude").on("change", filterData);
       d3.selectAll("#distance").on("change", filterData);
       
-      function filterData(){
+      function filterData() {
         chartArea.remove()
         
         chartArea = svg.append('g')
@@ -320,9 +320,9 @@
         
         var filteredData = []
         
-        if(selectCategory.value != "None"){
-          for(let i = 0; i < intersection.length; i++){
-            if(intersection[i]["search category"] == selectCategory.value){
+        if (selectCategory.value != "None") {
+          for (let i = 0; i < intersection.length; i++) {
+            if (intersection[i]["search category"] == selectCategory.value) {
               filteredData.push(intersection[i])
             }
           }
@@ -330,7 +330,7 @@
           filteredData = intersection
         }
         
-        filteredData = filteredData.filter(function(d){ return d.euclideanDistance  <= distance })
+        filteredData = filteredData.filter(function (d) { return d.euclideanDistance <= distance })
         
         plotCircles(filteredData)
       }
@@ -345,12 +345,12 @@
           }
         }
         
-        if(values.length == 0){
+        if (values.length == 0) {
           return yelpData
         } else {
-          var filteredData = yelpData.filter(function(d) {
-            for(let i = 0; i < values.length; i++){
-              if(d.rating >= values[i] && d.rating < values[i] + 1) {
+          var filteredData = yelpData.filter(function (d) {
+            for (let i = 0; i < values.length; i++) {
+              if (d.rating >= values[i] && d.rating < values[i] + 1) {
                 return true
               }
             }
@@ -370,12 +370,12 @@
           }
         }
         
-        if(values.length == 0){
+        if (values.length == 0) {
           return yelpData
         } else {
-          var filteredData = yelpData.filter(function(d) {
-            for(let i = 0; i < values.length; i++){
-              if(d.price == values[i]) {
+          var filteredData = yelpData.filter(function (d) {
+            for (let i = 0; i < values.length; i++) {
+              if (d.price == values[i]) {
                 return true
               }
             }
@@ -388,7 +388,7 @@
       
       
       // Drawing the plot 
-      function plotCircles(data){
+      function plotCircles(data) {
         const sizeExtent = d3.extent(yelpData, d => d.rating);
         const sizeScale = d3.scaleLinear().domain(sizeExtent).range([minRadius, maxRadius]);
         
@@ -400,7 +400,7 @@
         .padding(1.5)
         .radius(d => sizeScale(d.data.rating));
         
-        var root = d3.hierarchy({children: data})
+        var root = d3.hierarchy({ children: data })
         .sum(d => d.euclideanDistance)
         .sort(function (a, b) {
           return a.data.euclideanDistance - b.data.euclideanDistance;
@@ -418,52 +418,45 @@
         .attr("id", d => d.id)
         .attr("r", d => d.r)
         .attr("euclidean-dist", d => d.data.euclideanDistance)
-        .style("fill", d => colorScale(d.data["search category"]) );
+        .style("fill", d => colorScale(d.data["search category"]))
+        .on("mouseover", function (event, d) {
+          d3.select(this)
+          .transition().duration(200)
+          .attr("stroke", "black")
+          .attr("stroke-width", 4)
+          .style("opacity", 1)
+          
+          updateTooltip(d.data)
+        })
+        .on("mouseout", function (event, d) {
+          d3.select(this)
+          .transition().duration(200)
+          .attr("stroke", "")
+          
+          d3.select('#tooltip')
+          .transition().duration(200)
+          .style('opacity', 0)
+        });
         
       }
       
-      // HOVER CARD INTERACTION
-      // nodes.on("mouseover", function (event, d) {
-        //     d3.select(this)
-        //         .transition().duration(200)
-        //         .attr("stroke", "black")
-        //         .attr("stroke-width", 4)
-        //         .style("opacity", 1)
+      function updateTooltip(row) {
+        d3.select('#tooltip')
+        .transition().duration(200)
+        .style('opacity', 1)
+        .style("left", (event.pageX - 150) + "px")
+        .style("top", (event.pageY - 200) + "px")
         
-        //     updateTooltip(d)
-        
-        // });
-        
-        // circles.on("mouseout", function (event, d) {
-          //     d3.select(this)
-          //         .transition().duration(200)
-          //         .attr("stroke", "")
-          //         .attr("stroke-width", 1)
-          //         .style("opacity", 0.5)
-          
-          //     d3.select('#tooltip')
-          //         .transition().duration(200)
-          //         .style('opacity', 0)
-          
-          // });
-          
-          function updateTooltip(row) {
-            d3.select('#tooltip')
-            .transition().duration(200)
-            .style('opacity', 1)
-            .style("left", (event.pageX - 150) + "px")
-            .style("top", (event.pageY - 200) + "px")
-            
-            d3.select("#restaurant-title").text(row.name)
-            d3.select("#rating").text("Rating: " + row.rating)
-            d3.select("#review-count").text("Review Count: " + row.review_count)
-            d3.select("#snippet-text").text('"' + row.snippet_text + '"')
-          }
-          
-        }
-        drawPlot();
-      </script>
+        d3.select("#restaurant-title").text(row.name_x)
+        d3.select("#rating").text("Rating: " + row.rating)
+        d3.select("#review-count").text("Review Count: " + row.review_count)
+        d3.select("#snippet-text").text('"' + row.snippet_text + '"')
+      }
       
-    </body>
-    
-    </html>
+    }
+    drawPlot();
+  </script>
+  
+</body>
+
+</html>
