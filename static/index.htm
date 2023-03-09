@@ -323,6 +323,10 @@
         .text(c);
         
       })
+
+      // MOST RECOMMENDED
+      var restaurantsSorted = yelpData.sort((a, b) => a.score - b.score).reverse();
+      var mostRecommended = restaurantsSorted[0]
       
       // FILTERING 
       filterData()
@@ -360,6 +364,10 @@
         filteredData = filteredData.filter(function (d) { return d.euclideanDistance <= distance })
         
         plotCircles(filteredData)
+
+        var restaurantsSorted = filteredData.sort((a, b) => a.score - b.score).reverse();
+        var mostRecommended = restaurantsSorted[0]
+
       }
       
       function filterRatings() {
