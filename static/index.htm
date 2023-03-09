@@ -246,6 +246,9 @@
           </div>
         </div>
       </div>
+      <div id="recommendation">
+        <p>most recommended</p>
+      </div>
     </div>
   </div>
   <script>
@@ -487,7 +490,11 @@
         d3.select("#review-count").text("Review Count: " + row.review_count)
         d3.select("#snippet-text").text('"' + row.snippet_text + '"')
       }
-      
+
+      function addRecommendationCard() {
+
+      }
+      addRecommendationCard()
     }
     drawPlot();
   </script>
