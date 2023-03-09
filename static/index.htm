@@ -351,7 +351,7 @@
                     <p id="address-text"></p>
                 </div>
                 <div id="recommend-review">
-                    <img id="recommend-img" src="" alt="Image of the recommendation">
+                    <img id="recommend-img" src="">
                     <p id="review-text"></p>
                 </div>
                 <div></div>
@@ -477,6 +477,7 @@
 
                 var restaurantsSorted = filteredData.sort((a, b) => a.score - b.score).reverse();
                 var mostRecommended = restaurantsSorted[0]
+                console.log(mostRecommended)
                 updateRecommendationCard(mostRecommended);
             }
 
@@ -600,26 +601,33 @@
             }
 
             function updateRecommendationCard(mostRecommended) {
-                console.log(mostRecommended)
                 let recommendTitle = d3.select("#recommendation-title");
                 let recommendYelp = d3.select("#recommend-yelp-icon");
                 let recommendCategories = d3.select("#categories-text");
                 let recommendAddress = d3.select("#address-text");
                 let recommendImage = d3.select("#recommend-img");
-                let recommendReview = d3.select("#review-text")
+                let recommendReview = d3.select("#review-text");
 
-                recommendTitle.text(mostRecommended.name_x);
-                recommendYelp.on("click", () => window.open(mostRecommended.url))
-                    .style("cursor", "pointer");
-                let categoriesText = "";
-                mostRecommended.categories_hashtag.forEach(d => {
-                    categoriesText = `${categoriesText} ${d}`
-                })
-                recommendCategories.text(categoriesText);
-                let addressJSON = JSON.parse(mostRecommended.location)
-                recommendAddress.text(addressJSON.display_address)
-                recommendImage.attr("src", mostRecommended.photo)
-                recommendReview.text('"' + mostRecommended.review + '..."')
+                if (mostRecommended == undefined) {
+                    recommendTitle.text("There was none! Try again by readjusting your filters.");
+                    recommendCategories.text("");
+                    recommendAddress.text("")
+                    recommendImage.attr("src", "")
+                    recommendReview.text("")
+                } else {
+                    recommendTitle.text(mostRecommended.name_x);
+                    recommendYelp.on("click", () => window.open(mostRecommended.url))
+                        .style("cursor", "pointer");
+                    let categoriesText = "";
+                    mostRecommended.categories_hashtag.forEach(d => {
+                        categoriesText = `${categoriesText} ${d}`
+                    })
+                    recommendCategories.text(categoriesText);
+                    let addressJSON = JSON.parse(mostRecommended.location)
+                    recommendAddress.text(addressJSON.display_address)
+                    recommendImage.attr("src", mostRecommended.photo)
+                    recommendReview.text('"' + mostRecommended.review + '..."')
+                }
             }
         }
         drawPlot();
