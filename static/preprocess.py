@@ -5,7 +5,7 @@ FILE_NAME = "yelp_boston.csv"
 
 # Creates JSON file that maps each type to pokemon they are super effective attacking against
 data = []
-fields = ["Name", "Price", "Review", "ReviewRating", "Photo"]
+fields = ["Price", "Review", "ReviewRating", "Photo"]
 
 def preprocess(file_name):
     """
@@ -23,7 +23,7 @@ def preprocess(file_name):
             if response.status_code == 200:
                 res_json = response.json()
                 if "price" in res_json:
-                    new_row["Name"] = res_json["name"]
+                    # new_row["Name"] = res_json["name"]
                     new_row["Price"] = res_json["price"]
                 if "photos" in res_json:
                     new_row["Photo"] = res_json["photos"][0]
@@ -33,7 +33,6 @@ def preprocess(file_name):
             review_response = requests.get(url + "/reviews", headers=headers)
             if review_response.status_code == 200:
                 res_json = review_response.json()
-                print(res_json["reviews"][0])
                 new_row["Review"] = res_json["reviews"][0]["text"]
                 new_row["ReviewRating"] = res_json["reviews"][0]["rating"]
             else:
@@ -43,7 +42,7 @@ def preprocess(file_name):
     
 preprocess(FILE_NAME)
 
-# Writing to data.json          
+# Writing to prices.csv          
 with open('prices.csv', 'w', newline='') as file: 
     writer = csv.DictWriter(file, fieldnames = fields)
     writer.writeheader() 

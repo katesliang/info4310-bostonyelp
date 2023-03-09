@@ -108,24 +108,25 @@
             </div>
             <div id="ratings">
                 <p>Rating</p>
-                <input type="checkbox" id="one-star" name="chk" value="one">
+                <input class="ratingsBox" type="checkbox" id="one-star" name="chk" value="1">
                 <label for="one-star">⭐</label>
-                <input type="checkbox" id="two-star" name="chk" value="two">
+                <input class="ratingsBox" type="checkbox" id="two-star" name="chk" value="2">
                 <label for="two-star">⭐⭐</label>
-                <input type="checkbox" id="three-star" name="chk" value="three">
+                <input class="ratingsBox" type="checkbox" id="three-star" name="chk" value="3">
                 <label for="three-star">⭐⭐⭐</label>
-                <input type="checkbox" id="four-star" name="chk" value="four">
+                <input class="ratingsBox" type="checkbox" id="four-star" name="chk" value="4">
                 <label for="four-star">⭐⭐⭐⭐</label>
-                <input type="checkbox" id="five-star" name="chk" value="five">
+                <input class="ratingsBox" type="checkbox" id="five-star" name="chk" value="5">
                 <label for="five-star">⭐⭐⭐⭐⭐</label>
+                </div>
             </div>
             <div id="prices">
                 <p>Price</p>
-                <input type="checkbox" id="one-dollar" name="chk" value="one">
+                <input class="priceBox" type="checkbox" id="one-dollar" name="chk" value="$">
                 <label for="one-dollar">$</label>
-                <input type="checkbox" id="two-dollar" name="chk" value="two">
+                <input class="priceBox" type="checkbox" id="two-dollar" name="chk" value="$$">
                 <label for="two-dollar">$$</label>
-                <input type="checkbox" id="three-dollar" name="chk" value="three">
+                <input class="priceBox" type="checkbox" id="three-dollar" name="chk" value="$$$">
                 <label for="three-dollar">$$$</label>
             </div>
         </div>
@@ -154,119 +155,192 @@
 
         let chartArea = svg.append("g");
 
+        const minRadius = 5;
+        const maxRadius = 30;
+
         const drawPlot = async () => {
-            const yelpData = await d3.csv("yelp_boston.csv");
+            const yelpData = await d3.json("data.json");
             let categories = []
 
             yelpData.forEach(d => {
                 d.latitude = Number(d.latitude);
                 d.longitude = Number(d.longitude);
-                d.latitudeDistance = Number(Math.abs(d.latitude - currentLocation[0]))
-                d.longitudeDistance = Number(Math.abs(d.longitude - currentLocation[1]))
+                d.latitudeDistance = Number(Math.abs(d.latitude - currentLocation[0]));
+                d.longitudeDistance = Number(Math.abs(d.longitude - currentLocation[1]));
+                d.euclideanDistance = Number(Math.sqrt(Math.pow(d.latitudeDistance, 2) + Math.pow(d.longitudeDistance, 2)));
                 d.rating = Number(d.rating);
-                if (!categories.includes(d.search_category)) {
-                    categories.push(d.search_category)
+
+                switch (d["search category"]) {
+                    case "newamerican":
+                        d["search category"] = "New American"
+                        break;
+                    case "indpak":
+                        d["search category"] = "Indian-Pakistani"
+                        break;
+                    case "ethnicmarkets":
+                        d["search category"] = "Ethnic Markets"
+                        break;
+                    default:
+                        d["search category"] = d["search category"].charAt(0).toUpperCase() + d["search category"].slice(1)
                 }
+
+                if (!categories.includes(d["search category"])) {
+                    categories.push(d["search category"])
+                }
+
             })
 
             // Get all categories for dropdown filter
             categories.forEach(c => {
-                // Format string correctly
-                let category;
-
-                switch (c) {
-                    case "newamerican":
-                        category = "New American"
-                        break;
-                    case "indpak":
-                        category = "Indian-Pakistani"
-                        break;
-                    case "ethnicmarkets":
-                        category = "Ethnic Markets"
-                        break;
-                    default:
-                        category = c.charAt(0).toUpperCase() + c.slice(1)
-                }
                 d3.select("#select-category").append("option")
-                    .attr("value", category)
-                    .text(category);
+                    .attr("value", c)
+                    .text(c);
 
             })
 
-            const minRadius = 5;
-            const maxRadius = 30;
+            // FILTERING 
+            filterData()
 
-            const xExtent = d3.extent(yelpData, d => d.longitudeDistance);
-            const xScale = d3.scaleLinear().domain(xExtent).range([maxRadius * 2, chartWidth - maxRadius * 2]);
+            d3.selectAll("#select-category").on("change", filterData)
+            d3.selectAll(".ratingsBox").on("change", filterData);
+            d3.selectAll(".priceBox").on("change", filterData);
 
-            const yExtent = d3.extent(yelpData, d => d.latitudeDistance);
-            const yScale = d3.scaleLinear().domain(yExtent).range([chartHeight - maxRadius * 2, maxRadius * 2]);
+            function filterData(){
+                chartArea.remove()
 
-            const sizeExtent = d3.extent(yelpData, d => d.rating);
-            const sizeScale = d3.scaleLinear().domain(sizeExtent).range([minRadius, maxRadius]);
+                chartArea = svg.append('g')
 
-            const colors = ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a", "#ffff99", "#4e79a7", "#f28e2c", "#e15759", "#76b7b2", "#59a14f", "#edc949", "#af7aa1"];
-            const colorExtent = new Set(yelpData.map(d => d.search_category))
-            const colorScale = d3.scaleOrdinal().domain(colorExtent).range(colors);
+                let selectCategory = document.getElementById("select-category")
+                var ratingsFiltered = filterRatings()
+                var priceFiltered = filterPrice()
 
-            const circles = chartArea.selectAll("circle.point").data(yelpData)
-                .join("circle")
-                .attr("class", "point")
-                .attr("label", d => d.name)
-                .attr("cx", d => xScale(d.longitudeDistance))
-                .attr("cy", d => yScale(d.latitudeDistance))
-                .attr("r", d => sizeScale(d.rating))
-                .attr("opacity", 0.8)
-                .attr("fill", d => colorScale(d.search_category));
+                var intersection = ratingsFiltered.filter(value => priceFiltered.includes(value));
+                
+                var filteredData = []
 
-            const centerCircle = chartArea.append('circle')
-                .attr("class", "center")
-                .attr("label", "Current Location")
-                .attr("cx", chartHeight / 2)
-                .attr("cy", chartWidth / 2)
-                .attr("r", 5)
-                .attr("opacity", 1)
-                .attr("fill", "black");
+                if(selectCategory.value != "None"){
+                    for(let i = 0; i < intersection.length; i++){
+                        if(intersection[i]["search category"] == selectCategory.value){
+                            filteredData.push(intersection[i])
+                        }
+                    }
+                } else {
+                    filteredData = intersection
+                }
 
-            const updateNodePos = () => {
-                circles.attr("cx", d => d.x)
-                    .attr("cy", d => d.y)
+                plotCircles(filteredData)
             }
 
-            var simulation = d3.forceSimulation()
-                .nodes(yelpData)
-                .force("ypos", d3.forceY()
-                    .y(chartHeight / 2))
-                .force("xpos", d3.forceX()
-                    .x(chartWidth / 2))
-                .force("collide", d3.forceCollide().radius(d => sizeScale(d.rating) + 1))
-                .force("center", d3.forceCenter(chartHeight / 2, chartWidth / 2))
-                .on("tick", updateNodePos);
+            function filterRatings() {
+                var checkBoxes = document.getElementsByClassName('ratingsBox');
+
+                var values = []
+                for (let i = 0; i < checkBoxes.length; i++) {
+                    if (checkBoxes[i].checked) {
+                        values.push(Number(checkBoxes[i].value))
+                    }
+                }
+
+                if(values.length == 0){
+                    return yelpData
+                } else {
+                    var filteredData = yelpData.filter(function(d) {
+                        for(let i = 0; i < values.length; i++){
+                            if(d.rating >= values[i] && d.rating < values[i] + 1) {
+                                return true
+                            }
+                        }
+                        return false
+                    });
+                    
+                    return filteredData
+                }
+            }
+
+            function filterPrice() {
+                var checkBoxes = document.getElementsByClassName('priceBox');
+                var values = []
+                for (let i = 0; i < checkBoxes.length; i++) {
+                    if (checkBoxes[i].checked) {
+                        values.push(checkBoxes[i].value)
+                    }
+                }
+            
+                if(values.length == 0){
+                    return yelpData
+                } else {
+                    var filteredData = yelpData.filter(function(d) {
+                        for(let i = 0; i < values.length; i++){
+                            if(d.price == values[i]) {
+                                return true
+                            }
+                        }
+                        return false
+                    });
+                    
+                    return filteredData
+                }
+            }
+
+            // Drawing the plot 
+            function plotCircles(data){
+                const sizeExtent = d3.extent(yelpData, d => d.rating);
+                const sizeScale = d3.scaleLinear().domain(sizeExtent).range([minRadius, maxRadius]);
+
+                const colors = ["#a6cee3", "#1f78b4", "#b2df8a", "#33a02c", "#fb9a99", "#e31a1c", "#fdbf6f", "#ff7f00", "#cab2d6", "#6a3d9a", "#ffff99", "#4e79a7", "#f28e2c", "#e15759", "#76b7b2", "#59a14f", "#edc949", "#af7aa1"];
+                const colorScale = d3.scaleOrdinal().domain(categories).range(colors);
+
+                var pack = d3.pack()
+                            .size([chartWidth, chartHeight])
+                            .padding(1.5)
+                            .radius(d => sizeScale(d.data.rating));
+
+                var root = d3.hierarchy({children: data})
+                            .sum(d => d.euclideanDistance)
+                            .sort(function (a, b) {
+                                return a.data.euclideanDistance - b.data.euclideanDistance;
+                            });
+
+                var nodes = chartArea.selectAll(".node")
+                                    .data(pack(root).leaves())
+                                    .enter().append("g")
+                                    .attr("class", "node")
+                                    .attr("euclidean-dist", d => d.data.euclideanDistance)
+                                    .attr("transform", d => `translate(${d.x + 1},${d.y + 1})`);
+                                    
+                var color = d3.scaleOrdinal(d3.schemeCategory10);
+                nodes.append("circle")
+                    .attr("id", d => d.id)
+                    .attr("r", d => d.r)
+                    .attr("euclidean-dist", d => d.data.euclideanDistance)
+                    .style("fill", d => colorScale(d.data["search category"]) );
+            
+            }
 
             // HOVER CARD INTERACTION
-            circles.on("mouseover", function (event, d) {
-                d3.select(this)
-                    .transition().duration(200)
-                    .attr("stroke", "black")
-                    .attr("stroke-width", 4)
-                    .style("opacity", 1)
+            // nodes.on("mouseover", function (event, d) {
+            //     d3.select(this)
+            //         .transition().duration(200)
+            //         .attr("stroke", "black")
+            //         .attr("stroke-width", 4)
+            //         .style("opacity", 1)
 
-                updateTooltip(d)
+            //     updateTooltip(d)
 
-            });
+            // });
 
-            circles.on("mouseout", function (event, d) {
-                d3.select(this)
-                    .transition().duration(200)
-                    .attr("stroke", "")
-                    .attr("stroke-width", 1)
-                    .style("opacity", 0.5)
+            // circles.on("mouseout", function (event, d) {
+            //     d3.select(this)
+            //         .transition().duration(200)
+            //         .attr("stroke", "")
+            //         .attr("stroke-width", 1)
+            //         .style("opacity", 0.5)
 
-                d3.select('#tooltip')
-                    .transition().duration(200)
-                    .style('opacity', 0)
+            //     d3.select('#tooltip')
+            //         .transition().duration(200)
+            //         .style('opacity', 0)
 
-            });
+            // });
 
             function updateTooltip(row) {
                 d3.select('#tooltip')
