@@ -142,6 +142,46 @@
       width:300px;
       height:30px;
     }
+    #recommendation {
+        padding: 10px;
+        border: solid #a2b5cd;
+        border-radius : 20px;
+        margin: 20px;
+    }
+    #recommend-title {
+        display: flex;
+        align-items: center;
+        margin-left: 20px;
+    }
+    #recommend-yelp-icon {
+        width: 70px;
+        height: 70px;
+        padding-left: 30px;
+    }
+    #recommend-review {
+        display: flex;
+        align-items: flex-start;
+    }
+    #review-text {
+        padding: 30px;;
+        font: 38px sans-serif;
+    }
+    #recommend-img {
+        width: 500px;
+        height: 390px;
+        border-radius: 12px;
+        margin: 20px;
+    }
+    #categories-text {
+        font: 28px sans-serif;
+        margin-left: 20px;
+    }
+    #address-text {
+        font: 26px sans-serif;
+        color: #555;
+        margin-left: 20px;
+        padding-bottom: 20px;
+    }
     
   </style>
   
@@ -246,8 +286,22 @@
           </div>
         </div>
       </div>
-      <div id="recommendation">
-        <p>most recommended</p>
+      <div id="recommendation" class="recommend-contain">
+        <div id="recommend-title">
+            <h1 id="recommendation-title">Most Recommended</h1>
+            <img id="recommend-yelp-icon" src="yelp-icon.png" alt="Yelp Icon">
+        </div>
+        <div id="recommend-categories">
+            <p id="categories-text"></p>
+        </div>
+        <div id="recommend-address">
+            <p id="address-text"></p>
+        </div>
+        <div id="recommend-review">
+            <img id="recommend-img" src="" alt="Image of the recommendation">
+            <p id="review-text"></p>
+        </div>
+        <div></div>
       </div>
     </div>
   </div>
@@ -370,7 +424,7 @@
 
         var restaurantsSorted = filteredData.sort((a, b) => a.score - b.score).reverse();
         var mostRecommended = restaurantsSorted[0]
-
+        updateRecommendationCard(mostRecommended);
       }
       
       function filterRatings() {
@@ -491,10 +545,28 @@
         d3.select("#snippet-text").text('"' + row.snippet_text + '"')
       }
 
-      function addRecommendationCard() {
+      function updateRecommendationCard(mostRecommended) {
+        console.log(mostRecommended)
+        let recommendTitle = d3.select("#recommendation-title");
+        let recommendYelp = d3.select("#recommend-yelp-icon");
+        let recommendCategories = d3.select("#categories-text");
+        let recommendAddress = d3.select("#address-text");
+        let recommendImage = d3.select("#recommend-img");
+        let recommendReview = d3.select("#review-text")
 
+        recommendTitle.text(mostRecommended.name_x);
+        recommendYelp.on("click", () => window.open(mostRecommended.url))
+                     .style("cursor", "pointer");
+        let categoriesText = "";
+        mostRecommended.categories_hashtag.forEach(d => {
+            categoriesText = `${categoriesText} ${d}`
+        })
+        recommendCategories.text(categoriesText);
+        let addressJSON = JSON.parse(mostRecommended.location)
+        recommendAddress.text(addressJSON.display_address)
+        recommendImage.attr("src", mostRecommended.photo)
+        recommendReview.text(mostRecommended.review)
       }
-      addRecommendationCard()
     }
     drawPlot();
   </script>
