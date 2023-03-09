@@ -53,7 +53,7 @@
     body {
       /* background-color: #F9DBBB; */
       background-color: white;
-      font-family: 'Poppins','Helvetica Neue',Helvetica,Arial,sans-serif;
+      font-family: "Gill Sans",sans-serif;
     }
     .title {
       font-size: 50;
@@ -64,6 +64,9 @@
       justify-content: center;
       display: flex;
       flex-direction: horizontal;
+    }
+    .title h1{
+      padding: 15;
     }
     #logo{
       max-width: 600px; 
@@ -79,8 +82,10 @@
       font-size: 25px;
     }
     #visandfil{
+      width: 100%;
+      justify-content: space-around;
       display: flex;
-      font-size: 25px;
+      font-size: 30px;
     }
     #cooranddis{
       padding: 10px;
@@ -103,6 +108,9 @@
       border-radius : 20px;
       margin: 20px;
     }
+    #inputandfilters{
+      width: 50%;
+    }
     #inputandfilters p {
       margin-top: 1px;
       margin-bottom: 1px;
@@ -110,14 +118,25 @@
     .fil{
       display:flex;
       padding: 10;
+      justify-content: center;
     }
-    
     input[type='checkbox'] {
       width:30px;
       height:30px;
-      background:white;
-      border-radius:5px;
       border:2px solid #555;
+    }
+    #disandcate{
+      display:flex;
+      justify-content: space-around;
+    }
+    #select-category {
+      width: 350px;
+      margin: 10px;
+      font-size: 25;
+    }
+    input[type='range'] {
+      width:300px;
+      height:30px;
     }
     
   </style>
@@ -145,7 +164,7 @@
           <p id="snippet-text"></p>
         </div>
       </div>
-      <svg id="bubbleplot" height="900" width="900"></svg>
+      <svg id="bubbleplot" height="900" width = "1000"></svg>
     </div>
     
     <div id="inputandfilters">
@@ -155,50 +174,51 @@
         <div id = "coordinates_input">
           <!-- look up the 'maximum and minimum' longitude and latitude coordinates of boston-->
           <div>
-            <label for="longitude">Longitude:</label>
+            <label for="longitude">&#128205; Longitude:</label>
             <input class = "input" type="number" id="longitude" name="longitude" size="50" min="10" max="100" value = -71.0594533> 
           </div>
           <div>
-            <label for="latitude">Latitude:</label>
+            <label for="latitude">&#128205; Latitude:</label>
             <input class = "input" type="number" id="latitude" name="latitude" size="50" min="10" max="100" value = 42.3602613>
           </div>
         </div>
       </div>
       <div id = "filters">
-        <div class = "fil">
-          <label for="distance">Distance:</label>
-          <input type="range" id="distance" name="distance"  min="0" max="30" step = "5" value = "30" oninput="this.nextElementSibling.value = this.value">
-          <output>30</output>
+        <div id="disandcate">
+          <div class = "fil">
+            <label for="distance">Distance:</label>
+            <input type="range" id="distance" name="distance"  min="0" max="30" step = "5" value = "30" oninput="this.nextElementSibling.value = this.value">
+            <output>30</output>
+          </div>
+          
+          <div id="categories" class = "fil">
+            <p>Category: </p>
+            <select id="select-category">
+              <option value="None">None</option>
+            </select>
+          </div>
         </div>
-        
-        <div id="categories" class = "fil">
-          <p>Category: </p>
-          <select id="select-category">
-            <option value="None">None</option>
-          </select>
-        </div>
-        
         <div id="ratings" class = "fil">
           <p>Rating: </p>
           <div class = 'grouping'>
             <input class="ratingsBox" type="checkbox" id="one-star" name="chk" value="1">
-            <label for="one-star">⭐</label>
+            <label for="one-star">&#11088;</label>
           </div>
           <div class = 'grouping'>
             <input class="ratingsBox" type="checkbox" id="two-star" name="chk" value="2">
-            <label for="two-star">⭐⭐</label>
+            <label for="two-star">&#11088; &#11088;</label>
           </div>
           <div class = 'grouping'>
             <input class="ratingsBox" type="checkbox" id="three-star" name="chk" value="3">
-            <label for="three-star">⭐⭐⭐</label>
+            <label for="three-star">&#11088;&#11088;&#11088;</label>
           </div>
           <div class = 'grouping'>
             <input class="ratingsBox" type="checkbox" id="four-star" name="chk" value="4">
-            <label for="four-star">⭐⭐⭐⭐</label>
+            <label for="four-star">&#11088;&#11088;&#11088;&#11088;</label>
           </div>
           <div class = 'grouping'>
             <input class="ratingsBox" type="checkbox" id="five-star" name="chk" value="5">
-            <label for="five-star">⭐⭐⭐⭐⭐</label>
+            <label for="five-star">&#11088;&#11088;&#11088;&#11088;&#11088;</label>
           </div>
           
         </div>
@@ -207,15 +227,15 @@
           <p>Price: </p>
           <div class = "grouping">
             <input class="priceBox" type="checkbox" id="one-dollar" name="chk" value="$">
-            <label for="one-dollar">$</label>
+            <label for="one-dollar">&#128176 </label>
           </div>
           <div class = "grouping">
             <input class="priceBox" type="checkbox" id="two-dollar" name="chk" value="$$">
-            <label for="two-dollar">$$</label>
+            <label for="two-dollar">	&#128176	&#128176</label>
           </div>
           <div class = "grouping">
             <input class="priceBox" type="checkbox" id="three-dollar" name="chk" value="$$$">
-            <label for="three-dollar">$$$</label>
+            <label for="three-dollar">	&#128176	&#128176	&#128176</label>
           </div>
         </div>
       </div>
